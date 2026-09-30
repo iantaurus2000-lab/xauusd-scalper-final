@@ -1,0 +1,36 @@
+name: Build APK (Gratis)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'
+          channel: 'stable'
+          cache: true
+
+      - name: Setup project
+        run: |
+          # Jika struktur android belum lengkap, generate dulu
+          if [ ! -f "android/app/src/main/res/mipmap-hdpi/ic_launcher.png" ]; then
+            echo "Melengkapi struktur Flutter..."
+            flutter create . --project-name xauusd_pro_scalper --org com.example
+          fi
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK Release
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: xauusd-pro-scalper-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
